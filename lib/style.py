@@ -1,34 +1,48 @@
-"""Shared visual styling: CSS injection, Plotly template, branded header / footer."""
+"""Visual styling: editorial / academic-journal aesthetic.
+Hero with large university name in serif, minimal ornament, single accent."""
 from __future__ import annotations
 
 import plotly.graph_objects as go
 import plotly.io as pio
 import streamlit as st
 
-UNIVERSITY = "實踐大學 國際企業管理學系"
+UNIVERSITY = "實踐大學"
+DEPARTMENT = "國際企業管理學系"
+DEPARTMENT_EN = "Department of International Business Management"
 PROJECT_TITLE = "台積電法說會 × 五管框架"
 PROJECT_SUBTITLE = "解讀 2020 Q1 – 2026 Q1 共 25 場法說會"
 
-PRIMARY = "#C8102E"        # TSMC red
-DEEP_BLUE = "#1F4E79"
-INK = "#1A1A1A"
-MUTED = "#5A6C7D"
-BG_SOFT = "#F5F5F7"
-RULE = "#E5E5E8"
+PRIMARY = "#8B0000"          # deep crimson — academic accent
+INK = "#111111"
+TEXT = "#2A2A2A"
+MUTED = "#6B6B6B"
+SOFT = "#9A9A9A"
+RULE = "#E0E0E0"
+SURFACE = "#FAFAF9"
 
-# 5-management palette (used per page accent)
+# Per-management subtle accents (used for section markers, not full color blocks)
 MGMT_COLORS = {
-    "財": "#C9A227",   # gold
-    "銷": "#E76F51",   # marketing orange
-    "產": "#1F4E79",   # industrial blue
-    "發": "#6A1B9A",   # innovation purple
-    "人": "#2A9D8F",   # teal
+    "財": "#9C7A1A",   # restrained gold
+    "銷": "#A0522D",   # sienna
+    "產": "#1F4E79",   # navy
+    "發": "#5B2C6F",   # deep purple
+    "人": "#2D5F4E",   # forest
 }
 
 CHART_COLORWAY = [
-    "#1F4E79", "#C8102E", "#2A9D8F", "#E76F51",
-    "#6A1B9A", "#C9A227", "#5A6C7D", "#3B7A57",
+    "#1F4E79", "#8B0000", "#2D5F4E", "#A0522D",
+    "#5B2C6F", "#9C7A1A", "#5A6C7D", "#3B7A57",
 ]
+
+GOOGLE_FONTS_LINK = (
+    '<link rel="preconnect" href="https://fonts.googleapis.com">'
+    '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
+    '<link href="https://fonts.googleapis.com/css2?'
+    'family=Noto+Sans+TC:wght@300;400;500;700;900&'
+    'family=Noto+Serif+TC:wght@500;700;900&'
+    'family=Inter:wght@300;400;500;600;700&'
+    'display=swap" rel="stylesheet">'
+)
 
 _TEMPLATE_REGISTERED = False
 
@@ -40,35 +54,38 @@ def _register_plotly_template() -> None:
     pio.templates["tsmc"] = go.layout.Template(
         layout=go.Layout(
             font=dict(
-                family="'Noto Sans TC', 'Microsoft JhengHei', 'PingFang TC', 'Source Han Sans TC', sans-serif",
+                family="'Inter', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif",
                 size=13,
-                color=INK,
+                color=TEXT,
             ),
             paper_bgcolor="white",
             plot_bgcolor="white",
             colorway=CHART_COLORWAY,
             xaxis=dict(
-                gridcolor=RULE,
-                linecolor=MUTED,
+                gridcolor="#F0F0F0",
+                linecolor=RULE,
                 showline=True,
                 ticks="outside",
                 tickfont=dict(size=11, color=MUTED),
+                title=dict(font=dict(size=12, color=MUTED)),
             ),
             yaxis=dict(
-                gridcolor=RULE,
-                linecolor=MUTED,
+                gridcolor="#F0F0F0",
+                linecolor=RULE,
                 showline=False,
                 zeroline=False,
                 tickfont=dict(size=11, color=MUTED),
+                title=dict(font=dict(size=12, color=MUTED)),
             ),
             legend=dict(
                 bgcolor="rgba(255,255,255,0)",
-                font=dict(size=12, color=INK),
+                font=dict(size=12, color=TEXT),
+                borderwidth=0,
             ),
-            margin=dict(l=10, r=10, t=20, b=40),
+            margin=dict(l=8, r=8, t=24, b=44),
             hoverlabel=dict(
                 bgcolor="white",
-                font=dict(family="'Noto Sans TC', sans-serif", size=12, color=INK),
+                font=dict(family="'Inter', 'Noto Sans TC', sans-serif", size=12, color=INK),
                 bordercolor=RULE,
             ),
         )
@@ -79,138 +96,279 @@ def _register_plotly_template() -> None:
 
 def _css(accent: str) -> str:
     return f"""
+    {GOOGLE_FONTS_LINK}
     <style>
-    /* Shrink top padding so brand band sits closer to top */
-    .block-container {{ padding-top: 1.5rem; padding-bottom: 4rem; max-width: 1200px; }}
+    /* === BASE TYPOGRAPHY === */
+    html, body, [class*="css"] {{
+        font-family: 'Inter', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif !important;
+        color: {TEXT};
+        font-feature-settings: "tnum", "ss01";
+    }}
+    .block-container {{
+        padding-top: 2.5rem;
+        padding-bottom: 5rem;
+        max-width: 1100px;
+    }}
 
-    /* Brand band */
-    .tsmc-band {{
-        background: linear-gradient(135deg, #0F2A45 0%, #1F4E79 100%);
-        color: white;
-        padding: 18px 28px 22px 28px;
-        border-radius: 6px;
-        margin-bottom: 28px;
-        position: relative;
-        overflow: hidden;
+    /* Default text */
+    .stMarkdown, .stMarkdown p {{
+        font-size: 15px;
+        line-height: 1.75;
+        color: {TEXT};
     }}
-    .tsmc-band::before {{
-        content: "";
-        position: absolute;
-        left: 0; top: 0; bottom: 0; width: 5px;
-        background: {accent};
+    .stMarkdown strong {{ color: {INK}; font-weight: 700; }}
+
+    /* === HERO === */
+    .hero {{
+        padding: 8px 0 28px 0;
+        margin-bottom: 36px;
+        border-bottom: 1px solid {RULE};
     }}
-    .tsmc-band .tag {{
+    .hero .uni-tag {{
+        font-family: 'Inter', 'Noto Sans TC', sans-serif;
         font-size: 11px;
-        letter-spacing: 0.18em;
+        font-weight: 600;
+        letter-spacing: 0.32em;
         text-transform: uppercase;
-        opacity: 0.85;
-        margin-bottom: 8px;
-        font-weight: 500;
+        color: {accent};
+        margin-bottom: 14px;
     }}
-    .tsmc-band .title {{
-        font-size: 26px;
+    .hero .uni-name {{
+        font-family: 'Noto Serif TC', 'Songti TC', serif;
+        font-size: 56px;
+        font-weight: 900;
+        line-height: 1.0;
+        letter-spacing: 0.06em;
+        color: {INK};
+        margin: 0 0 6px 0;
+    }}
+    .hero .dept-name {{
+        font-family: 'Noto Serif TC', serif;
+        font-size: 30px;
         font-weight: 700;
-        line-height: 1.25;
-        margin: 0 0 4px 0;
-        letter-spacing: 0.02em;
+        line-height: 1.2;
+        letter-spacing: 0.04em;
+        color: {INK};
+        margin: 0 0 10px 0;
     }}
-    .tsmc-band .sub {{
-        font-size: 13px;
-        opacity: 0.82;
-        margin: 0;
-    }}
-
-    /* Page accent strip on h2 / h3 (st.header / st.subheader) */
-    h2, h3 {{
-        border-left: 4px solid {accent};
-        padding-left: 12px !important;
-        font-size: 20px !important;
-        margin-top: 28px !important;
-        margin-bottom: 12px !important;
-        letter-spacing: 0.01em;
-        color: {INK} !important;
-    }}
-    h3 {{ font-size: 18px !important; }}
-
-    /* Metric card subtle styling */
-    [data-testid="stMetric"] {{
-        background: {BG_SOFT};
-        padding: 14px 18px 14px 18px;
-        border-radius: 6px;
-        border-top: 3px solid {accent};
-    }}
-    [data-testid="stMetricLabel"] p {{
-        color: {MUTED};
+    .hero .dept-en {{
+        font-family: 'Inter', sans-serif;
         font-size: 12px;
         font-weight: 500;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: {SOFT};
+        margin: 0 0 28px 0;
+    }}
+    .hero .accent-rule {{
+        width: 56px;
+        height: 3px;
+        background: {accent};
+        margin: 0 0 22px 0;
+    }}
+    .hero .project-title {{
+        font-family: 'Noto Serif TC', serif;
+        font-size: 26px;
+        font-weight: 700;
+        color: {INK};
+        margin: 0 0 6px 0;
+        letter-spacing: 0.02em;
+    }}
+    .hero .project-sub {{
+        font-family: 'Inter', 'Noto Sans TC', sans-serif;
+        font-size: 14px;
+        font-weight: 400;
+        color: {MUTED};
+        margin: 0;
+        letter-spacing: 0.01em;
+    }}
+
+    /* === SECTION HEADINGS === */
+    h1 {{ display: none; }}  /* Hide stray st.title — hero replaces it */
+    h2, h3 {{
+        font-family: 'Noto Serif TC', serif !important;
+        color: {INK} !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.02em !important;
+        border: none !important;
+        padding: 0 !important;
+        margin-top: 44px !important;
+        margin-bottom: 16px !important;
+    }}
+    h2 {{ font-size: 24px !important; }}
+    h3 {{ font-size: 19px !important; }}
+
+    /* Add small accent rule before h2/h3 */
+    h2::before, h3::before {{
+        content: "";
+        display: block;
+        width: 28px;
+        height: 2px;
+        background: {accent};
+        margin-bottom: 12px;
+    }}
+
+    /* === BLOCKQUOTE — quietly emphasised callout === */
+    blockquote {{
+        border: none !important;
+        border-left: 2px solid {accent} !important;
+        background: transparent !important;
+        padding: 4px 0 4px 18px !important;
+        margin: 0 0 24px 0 !important;
+        color: {TEXT} !important;
+        font-size: 14px !important;
+        line-height: 1.75 !important;
+    }}
+    blockquote p {{
+        margin: 6px 0 !important;
+        color: {TEXT} !important;
+    }}
+    blockquote strong {{ color: {INK}; }}
+
+    /* === METRIC CARDS — minimal, top-rule only === */
+    [data-testid="stMetric"] {{
+        background: transparent;
+        padding: 14px 4px 8px 4px;
+        border-top: 2px solid {accent};
+        border-radius: 0;
+    }}
+    [data-testid="stMetricLabel"] {{ margin-bottom: 6px; }}
+    [data-testid="stMetricLabel"] p {{
+        color: {MUTED};
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.18em !important;
+        text-transform: uppercase !important;
     }}
     [data-testid="stMetricValue"] {{
-        color: {INK};
-        font-size: 28px !important;
+        color: {INK} !important;
+        font-family: 'Inter', sans-serif !important;
+        font-size: 30px !important;
+        font-weight: 700 !important;
+        letter-spacing: -0.01em !important;
+    }}
+    [data-testid="stMetricDelta"] {{
+        font-size: 12px !important;
+        font-weight: 500 !important;
     }}
 
-    /* Blockquote — softer */
-    blockquote {{
-        border-left: 3px solid {accent} !important;
-        background: {BG_SOFT};
-        padding: 12px 16px !important;
-        margin: 0 0 16px 0 !important;
-        color: {INK};
+    /* === DIVIDER === */
+    hr {{
+        border: none !important;
+        border-top: 1px solid {RULE} !important;
+        margin: 36px 0 !important;
+    }}
+
+    /* === TABLES === */
+    .stMarkdown table {{
+        border-collapse: collapse;
+        width: 100%;
+        margin: 12px 0;
         font-size: 14px;
     }}
-    blockquote p {{ margin: 4px 0 !important; }}
-
-    /* Divider — slightly darker */
-    hr {{ border-color: {RULE} !important; margin: 28px 0 !important; }}
-
-    /* Sidebar tighter */
-    [data-testid="stSidebar"] {{
-        background: {BG_SOFT};
+    .stMarkdown table th {{
+        text-align: left;
+        font-weight: 700;
+        color: {INK};
+        border-bottom: 2px solid {INK};
+        padding: 10px 14px;
+        background: {SURFACE};
     }}
-    [data-testid="stSidebar"] [data-testid="stSidebarNav"] {{ padding-top: 8px; }}
+    .stMarkdown table td {{
+        padding: 10px 14px;
+        border-bottom: 1px solid {RULE};
+        color: {TEXT};
+    }}
 
-    /* Footer */
-    .tsmc-footer {{
-        margin-top: 64px;
-        padding: 16px 0 8px 0;
+    /* === CAPTION === */
+    .stCaption, [data-testid="stCaptionContainer"] {{
+        color: {MUTED} !important;
+        font-size: 12px !important;
+        line-height: 1.6 !important;
+        letter-spacing: 0.01em !important;
+    }}
+
+    /* === SIDEBAR === */
+    [data-testid="stSidebar"] {{
+        background: {SURFACE};
+        border-right: 1px solid {RULE};
+    }}
+    [data-testid="stSidebar"] [data-testid="stSidebarNav"] {{
+        padding-top: 12px;
+    }}
+    [data-testid="stSidebarNav"] a {{
+        font-family: 'Noto Sans TC', sans-serif !important;
+        font-size: 14px !important;
+        color: {TEXT} !important;
+    }}
+    [data-testid="stSidebarNav"] a[aria-current="page"] {{
+        color: {INK} !important;
+        font-weight: 700 !important;
+    }}
+
+    /* === EXPANDER === */
+    [data-testid="stExpander"] {{
+        border: 1px solid {RULE} !important;
+        border-radius: 4px;
+    }}
+
+    /* === FOOTER === */
+    .footer {{
+        margin-top: 80px;
+        padding: 24px 0 8px 0;
         border-top: 1px solid {RULE};
         color: {MUTED};
         font-size: 12px;
-        text-align: center;
-        line-height: 1.6;
+        line-height: 1.7;
+        letter-spacing: 0.02em;
     }}
-    .tsmc-footer .school {{ color: {INK}; font-weight: 500; }}
+    .footer .school {{
+        color: {INK};
+        font-weight: 700;
+        font-family: 'Noto Serif TC', serif;
+        letter-spacing: 0.04em;
+    }}
+    .footer .sep {{
+        color: {SOFT};
+        margin: 0 8px;
+    }}
+
+    /* Hide Streamlit chrome we don't want */
+    [data-testid="stToolbar"] {{ visibility: hidden; }}
+    footer {{ visibility: hidden; }}
+    #MainMenu {{ visibility: hidden; }}
     </style>
     """
 
 
 def apply_branding(page_subtitle: str | None = None, accent_key: str | None = None) -> None:
-    """Inject CSS, register Plotly template, render branded header.
-    `accent_key` is one of 財/銷/產/發/人 to color the page accent."""
+    """Render hero header. `accent_key` ∈ {財,銷,產,發,人}; defaults to crimson.
+    Uses st.html() so the raw HTML/CSS isn't routed through the Markdown parser
+    (which would otherwise treat 4-space-indented blocks as code)."""
     accent = MGMT_COLORS.get(accent_key, PRIMARY) if accent_key else PRIMARY
     _register_plotly_template()
-    st.markdown(_css(accent), unsafe_allow_html=True)
+    st.html(_css(accent))
     sub = page_subtitle or PROJECT_SUBTITLE
-    st.markdown(
-        f"""
-        <div class="tsmc-band">
-            <div class="tag">{UNIVERSITY}</div>
-            <div class="title">{PROJECT_TITLE}</div>
-            <div class="sub">{sub}</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
+    st.html(
+        f'<div class="hero">'
+        f'<div class="uni-tag">Shih Chien University</div>'
+        f'<div class="uni-name">{UNIVERSITY}</div>'
+        f'<div class="dept-name">{DEPARTMENT}</div>'
+        f'<div class="dept-en">{DEPARTMENT_EN}</div>'
+        f'<div class="accent-rule"></div>'
+        f'<div class="project-title">{PROJECT_TITLE}</div>'
+        f'<div class="project-sub">{sub}</div>'
+        f'</div>'
     )
 
 
 def render_footer() -> None:
-    st.markdown(
-        f"""
-        <div class="tsmc-footer">
-            <span class="school">{UNIVERSITY}</span>　·　國際企業管理 教學展示
-            <br/>資料來源：台積電歷年法說會逐字稿（LSEG / Refinitiv StreetEvents），數值以 regex 萃取自 CFO 開場與 CEO 重點段落。
-        </div>
-        """,
-        unsafe_allow_html=True,
+    st.html(
+        f'<div class="footer">'
+        f'<span class="school">{UNIVERSITY} {DEPARTMENT}</span>'
+        f'<span class="sep">·</span>國際企業管理 教學展示'
+        f'<span class="sep">·</span>2026'
+        f'<br/>資料來源：台積電歷年法說會逐字稿（LSEG / Refinitiv StreetEvents）。'
+        f'數值以 regex 萃取自 CFO 開場與 CEO 重點段落。'
+        f'</div>'
     )

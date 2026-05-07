@@ -24,20 +24,28 @@ uv run streamlit run main.py
 
 ```
 streamlit_app/
-├── main.py                    入口頁（總覽）
-├── pages/                     五管子頁
-│   ├── 1_財_財務管理.py
-│   ├── 2_銷_行銷管理.py
-│   ├── 3_產_生產管理.py
-│   ├── 4_發_研發管理.py
-│   └── 5_人_人力資源.py
+├── main.py                    入口（st.navigation 路由）
+├── home.py                    首頁內容（總覽指標）
+├── pages/
+│   ├── 1_財_財務管理.py        五管：財
+│   ├── 2_銷_行銷管理.py        五管：銷
+│   ├── 3_產_生產管理.py        五管：產
+│   ├── 4_發_研發管理.py        五管：發
+│   ├── 5_人_人力資源.py        五管：人
+│   ├── 6_股價反應.py            事件研究 CAR
+│   ├── 7_文本分析.py            NLP（情感詞彙、LDA 主題、語言漂移）
+│   └── 8_地緣政治.py            14 個關鍵事件 × 毛利率 / CAR
 ├── lib/
-│   ├── data.py                資料載入器
+│   ├── data.py                資料載入器（含 GEO_EVENTS 事件清單）
 │   └── style.py               視覺樣式（CSS + Plotly template）
 ├── data/
 │   ├── transcripts/           25 份法說會 markdown
 │   ├── build_dataset.py       regex 萃取腳本
-│   └── quarterly.csv          25 季 × 49 欄結構化資料
+│   ├── quarterly.csv          25 季 × 49 欄結構化資料
+│   ├── nlp_panel.csv          詞彙詞頻、LDA 主題、語言漂移
+│   ├── event_study_panel.csv  事件研究 CAR / SAR
+│   ├── cross_market.csv       TSM US vs 2330 TW 跨市場分歧
+│   └── *_prices.csv           TSM / 2330 / SPY / TWII 日線
 ├── .streamlit/config.toml     主題設定
 ├── pyproject.toml             uv 依賴
 └── requirements.txt           Streamlit Cloud pip 依賴
