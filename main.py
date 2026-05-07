@@ -6,6 +6,7 @@ underlying filenames. Each page module sets its own st.set_page_config().
 import streamlit as st
 
 home = st.Page("home.py", title="首頁", default=True, url_path="home")
+history = st.Page("pages/0_歷年總覽.py", title="歷年總覽 1994-2026", url_path="history")
 finance = st.Page("pages/1_財_財務管理.py", title="財  財務管理", url_path="finance")
 marketing = st.Page("pages/2_銷_行銷管理.py", title="銷  行銷管理", url_path="marketing")
 production = st.Page("pages/3_產_生產管理.py", title="產  生產管理", url_path="production")
@@ -18,7 +19,7 @@ search = st.Page("pages/9_詞彙搜尋.py", title="詞彙搜尋", url_path="sear
 
 pg = st.navigation(
     {
-        "首頁": [home],
+        "首頁": [home, history],
         "五管框架": [finance, marketing, production, rd, hr],
         "延伸分析": [stock, nlp, geo],
         "互動工具": [search],

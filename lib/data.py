@@ -113,6 +113,21 @@ def load_lda_topics() -> pd.DataFrame:
     return pd.read_csv(LDA_TOPICS_CSV)
 
 
+@st.cache_data
+def load_annual_history() -> pd.DataFrame:
+    """32-year annual financials (1994-2026): EPS, stock price, cash flows."""
+    df = pd.read_csv(DATA_DIR / "annual_history.csv")
+    for col in df.columns:
+        if col == "year":
+            continue
+        s = df[col].astype(str).str.strip()
+        # Treat solitary "-" or empty as NaN, strip thousand separators / + sign
+        s = s.replace({"-": pd.NA, "": pd.NA, "nan": pd.NA, "None": pd.NA})
+        s = s.str.replace(",", "", regex=False).str.replace("+", "", regex=False)
+        df[col] = pd.to_numeric(s, errors="coerce")
+    return df.sort_values("year").reset_index(drop=True)
+
+
 # === Geopolitical events (curated) ===
 # Each entry: ISO date, short label (zh), category (used for color),
 # detail (1-line context). Used to overlay vlines on time series and to render
