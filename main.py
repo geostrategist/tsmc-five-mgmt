@@ -14,12 +14,14 @@ hr = st.Page("pages/5_人_人力資源.py", title="人  人力資源", url_path=
 stock = st.Page("pages/6_股價反應.py", title="股價反應", url_path="stock-reaction")
 nlp = st.Page("pages/7_文本分析.py", title="文本分析", url_path="text-analysis")
 geo = st.Page("pages/8_地緣政治.py", title="地緣政治", url_path="geopolitics")
+search = st.Page("pages/9_詞彙搜尋.py", title="詞彙搜尋", url_path="search")
 
 pg = st.navigation(
     {
         "首頁": [home],
         "五管框架": [finance, marketing, production, rd, hr],
         "延伸分析": [stock, nlp, geo],
+        "互動工具": [search],
     }
 )
 pg.run()

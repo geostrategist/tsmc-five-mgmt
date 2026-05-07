@@ -155,9 +155,99 @@ def geo_events_df() -> pd.DataFrame:
     return df.sort_values("date").reset_index(drop=True)
 
 
+_NOISE_PATTERNS = [
+    "STREETEVENTS",
+    "lseg.com",
+    "refinitiv.com",
+    "thomsonreuters.com",
+    "Republication or",
+    "registered trademarks",
+    "Contact Us",
+    "All rights reserved",
+    "prior written consent",
+    "framing or similar",
+    "(Chinese, English)",
+]
+
+
+def _clean_transcript(text: str) -> str:
+    """Strip repeated LSEG / Refinitiv / Thomson Reuters boilerplate lines so
+    full-text searches aren't dominated by copyright noise."""
+    out = []
+    for line in text.splitlines():
+        if any(p in line for p in _NOISE_PATTERNS):
+            continue
+        if line.strip().startswith("©20"):
+            continue
+        out.append(line)
+    return "\n".join(out)
+
+
+@st.cache_data
+def search_term(term: str, whole_word: bool = True, case_sensitive: bool = False) -> pd.DataFrame:
+    """Full-text search across all transcripts (2020+).
+
+    Returns one row per quarter with: quarter_key, year, quarter, count,
+    sentences (list of strings containing the term), quarter_label, quarter_idx.
+    """
+    if not term or not term.strip():
+        return pd.DataFrame(columns=["quarter_key", "year", "quarter", "count", "sentences"])
+
+    import re as _re
+    pattern = _re.escape(term.strip())
+    if whole_word:
+        pattern = rf"\b{pattern}\b"
+    flags = 0 if case_sensitive else _re.IGNORECASE
+    rx = _re.compile(pattern, flags)
+    sent_split = _re.compile(r"(?<=[.!?])\s+")
+
+    rows = []
+    for path in sorted(MARKDOWN_DIR.glob("*.md")):
+        qk = path.stem
+        try:
+            year = int(qk.split("_")[0])
+            quarter = qk.split("_")[1]
+        except (IndexError, ValueError):
+            continue
+        if year < FOCUS_YEAR_START:
+            continue
+        text = _clean_transcript(path.read_text(encoding="utf-8"))
+        matches = rx.findall(text)
+        count = len(matches)
+        sentences: list[str] = []
+        if count:
+            for s in sent_split.split(text.replace("\n", " ")):
+                s = " ".join(s.split())  # collapse whitespace
+                if rx.search(s) and 20 < len(s) < 600:
+                    sentences.append(s)
+        rows.append({
+            "quarter_key": qk,
+            "year": year,
+            "quarter": quarter,
+            "count": count,
+            "sentences": sentences,
+        })
+
+    df = pd.DataFrame(rows)
+    if df.empty:
+        return df
+    return _add_quarter_label(df)
+
+
+def highlight_term(sentence: str, term: str, case_sensitive: bool = False) -> str:
+    """Wrap term occurrences in HTML <mark> tags for streamlit markdown rendering."""
+    if not term:
+        return sentence
+    import re as _re
+    flags = 0 if case_sensitive else _re.IGNORECASE
+    pattern = _re.compile(f"({_re.escape(term)})", flags)
+    return pattern.sub(r"<mark style='background:#FFE680;padding:0 2px;border-radius:2px;'>\1</mark>", sentence)
+
+
 def add_geo_event_vlines(fig, x_dates: pd.Series, y_max=None, opacity: float = 0.25):
-    """Overlay GEO_EVENTS as faint vertical lines on a Plotly figure.
-    `x_dates` is the x-axis date series the chart uses (to bound visible range)."""
+    """Overlay GEO_EVENTS as faint vertical lines + labels on a Plotly figure.
+    Uses `add_shape` + `add_annotation` separately because `add_vline(annotation_*)`
+    has a bug in plotly 5.x with datetime axes (it tries to .mean() Timestamps)."""
     if x_dates.empty:
         return fig
     lo, hi = x_dates.min(), x_dates.max()
@@ -168,20 +258,35 @@ def add_geo_event_vlines(fig, x_dates: pd.Series, y_max=None, opacity: float = 0
         "industry_policy": "#1F4E79",
         "competitor": "#9C7A1A",
     }
+    label_opacity = min(1.0, opacity * 3)
     for ev in GEO_EVENTS:
         d = pd.to_datetime(ev["date"])
         if d < lo or d > hi:
             continue
         color = cat_colors.get(ev["cat"], "#888888")
-        fig.add_vline(
-            x=d,
-            line_width=1,
-            line_dash="dot",
-            line_color=color,
+        # full-height dotted line
+        fig.add_shape(
+            type="line",
+            x0=d, x1=d,
+            y0=0, y1=1,
+            xref="x",
+            yref="paper",
+            line=dict(color=color, width=1, dash="dot"),
             opacity=opacity,
-            annotation_text=ev["label"],
-            annotation_position="top",
-            annotation_font_size=9,
-            annotation_font_color=color,
+            layer="below",
+        )
+        # label inside the plot at top, to avoid clipping by chart margin
+        fig.add_annotation(
+            x=d,
+            y=0.98,
+            xref="x",
+            yref="paper",
+            text=ev["label"],
+            showarrow=False,
+            yanchor="top",
+            xanchor="left",
+            font=dict(size=9, color=color),
+            opacity=label_opacity,
+            textangle=-90,
         )
     return fig

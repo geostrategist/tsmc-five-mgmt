@@ -333,10 +333,63 @@ def _css(accent: str) -> str:
         margin: 0 8px;
     }}
 
-    /* Hide Streamlit chrome we don't want */
-    [data-testid="stToolbar"] {{ visibility: hidden; }}
-    footer {{ visibility: hidden; }}
-    #MainMenu {{ visibility: hidden; }}
+    /* Hide only the Streamlit-default footer "Made with Streamlit" — keep the
+       toolbar and hamburger menu so the user can collapse / reopen the sidebar
+       and access settings. */
+    footer {{ visibility: hidden; height: 0; }}
+
+    /* === Sidebar collapse / expand buttons — strong contrast === */
+    /* When sidebar is COLLAPSED: this is the "open sidebar" button (top-left). */
+    [data-testid="stSidebarCollapsedControl"],
+    [data-testid="collapsedControl"] {{
+        visibility: visible !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        opacity: 1 !important;
+        background: {accent} !important;
+        border: 2px solid white !important;
+        border-radius: 8px !important;
+        padding: 6px !important;
+        margin: 12px 0 0 12px !important;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.22) !important;
+        width: 44px !important;
+        height: 44px !important;
+        z-index: 999999 !important;
+        position: fixed !important;
+        top: 8px !important;
+        left: 8px !important;
+        transition: transform 0.15s ease, background 0.15s ease !important;
+    }}
+    [data-testid="stSidebarCollapsedControl"]:hover,
+    [data-testid="collapsedControl"]:hover {{
+        background: {INK} !important;
+        transform: scale(1.06) !important;
+    }}
+    [data-testid="stSidebarCollapsedControl"] button,
+    [data-testid="stSidebarCollapsedControl"] svg,
+    [data-testid="collapsedControl"] button,
+    [data-testid="collapsedControl"] svg {{
+        color: white !important;
+        fill: white !important;
+        stroke: white !important;
+        width: 26px !important;
+        height: 26px !important;
+    }}
+
+    /* When sidebar is OPEN: the "<<" close button — also prominent */
+    [data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"],
+    [data-testid="stSidebar"] [data-testid="baseButton-headerNoPadding"] {{
+        background: {accent} !important;
+        border-radius: 6px !important;
+        padding: 4px !important;
+    }}
+    [data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] svg,
+    [data-testid="stSidebar"] [data-testid="baseButton-headerNoPadding"] svg {{
+        color: white !important;
+        fill: white !important;
+        stroke: white !important;
+    }}
     </style>
     """
 
