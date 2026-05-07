@@ -322,6 +322,14 @@ def _css(accent: str) -> str:
         line-height: 1.7;
         letter-spacing: 0.02em;
     }}
+    .footer .author {{
+        font-family: 'Noto Serif TC', serif;
+        font-size: 15px;
+        font-weight: 700;
+        color: {INK};
+        letter-spacing: 0.06em;
+        margin-bottom: 10px;
+    }}
     .footer .school {{
         color: {INK};
         font-weight: 700;
@@ -418,6 +426,7 @@ def apply_branding(page_subtitle: str | None = None, accent_key: str | None = No
 def render_footer() -> None:
     st.html(
         f'<div class="footer">'
+        f'<div class="author">Damien Tsai 老師　製作</div>'
         f'<span class="school">{UNIVERSITY} {DEPARTMENT}</span>'
         f'<span class="sep">·</span>國際企業管理 教學展示'
         f'<span class="sep">·</span>2026'
